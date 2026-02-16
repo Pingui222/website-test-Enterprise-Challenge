@@ -1,0 +1,1396 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Engilab · ETSEIB / UPC</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.development.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.development.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+  <!-- QR Scanner -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+  <!-- QR Generator -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow:ital,wght@0,300;0,400;0,600;0,800;1,300&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #0d0f14;
+      --surface:  #13161d;
+      --panel:    #1a1e28;
+      --border:   #2a2f3d;
+      --accent:   #e8b84b;
+      --accent2:  #4be8b8;
+      --danger:   #e84b4b;
+      --text:     #cdd3e0;
+      --muted:    #5a6275;
+      --font-ui:  'Barlow', sans-serif;
+      --font-mono:'Share Tech Mono', monospace;
+    }
+
+    html, body { height: 100%; background: var(--bg); color: var(--text); font-family: var(--font-ui); }
+
+    /* ── Noise texture overlay ── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0; pointer-events: none; z-index: 9999;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      opacity: 0.35;
+    }
+
+    #root { display: flex; flex-direction: column; min-height: 100%; }
+
+    /* ── HEADER ── */
+    .header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 28px;
+      height: 60px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      position: sticky; top: 0; z-index: 100;
+    }
+    .header-brand {
+      display: flex; align-items: center; gap: 12px;
+    }
+    .header-brand .logo-mark {
+      width: 34px; height: 34px;
+      border: 2px solid var(--accent);
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-mono); font-size: 13px; color: var(--accent);
+      letter-spacing: -1px;
+      position: relative;
+    }
+    .header-brand .logo-mark::before {
+      content: '';
+      position: absolute; inset: 3px;
+      background: var(--accent);
+      opacity: 0.08;
+    }
+    .header-brand h1 {
+      font-size: 16px; font-weight: 800; letter-spacing: 0.12em;
+      text-transform: uppercase; color: #fff;
+    }
+    .header-brand span {
+      font-size: 11px; font-weight: 300; color: var(--muted); letter-spacing: 0.05em;
+    }
+    .header-info {
+      font-family: var(--font-mono); font-size: 11px; color: var(--muted);
+    }
+    .header-info .dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--accent2); margin-right: 6px; animation: blink 2s infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+    /* ── MAIN NAV TABS ── */
+    .tab-bar {
+      display: flex; gap: 0;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      padding: 0 28px;
+    }
+    .tab-btn {
+      background: none; border: none; cursor: pointer;
+      padding: 14px 28px; font-family: var(--font-ui);
+      font-size: 13px; font-weight: 600; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--muted);
+      border-bottom: 3px solid transparent;
+      transition: color 0.2s, border-color 0.2s;
+      position: relative;
+    }
+    .tab-btn:hover { color: var(--text); }
+    .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .tab-btn .tab-icon { margin-right: 8px; font-size: 15px; }
+
+    /* ── CONTENT AREA ── */
+    .content { flex: 1; padding: 28px; max-width: 1100px; margin: 0 auto; width: 100%; }
+
+    /* ── SECTION HEADER ── */
+    .section-header {
+      display: flex; align-items: flex-end; justify-content: space-between;
+      margin-bottom: 24px;
+    }
+    .section-title {
+      font-size: 28px; font-weight: 800; letter-spacing: -0.02em; color: #fff;
+      line-height: 1;
+    }
+    .section-subtitle {
+      font-size: 12px; font-weight: 300; color: var(--muted);
+      letter-spacing: 0.08em; text-transform: uppercase; margin-top: 4px;
+    }
+    .section-badge {
+      font-family: var(--font-mono); font-size: 11px; color: var(--accent);
+      border: 1px solid var(--accent); padding: 3px 10px; letter-spacing: 0.1em;
+    }
+
+    /* ── CARD GRID ── */
+    .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-bottom: 24px; }
+
+    /* ── CARD ── */
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      padding: 20px 22px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.2s, transform 0.15s;
+    }
+    .card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .card:hover { border-color: #3a3f52; transform: translateY(-1px); }
+    .card:hover::before { opacity: 1; }
+    .card-label {
+      font-size: 10px; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 8px;
+    }
+    .card-value {
+      font-family: var(--font-mono); font-size: 32px; color: #fff; line-height: 1;
+    }
+    .card-sub { font-size: 12px; color: var(--muted); margin-top: 6px; }
+    .card-accent-line {
+      position: absolute; bottom: 0; left: 0; height: 3px;
+      background: var(--accent); width: var(--fill, 60%);
+    }
+
+    /* ── BUTTON SYSTEM ── */
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 10px 20px; border: 1px solid; cursor: pointer;
+      font-family: var(--font-ui); font-size: 12px; font-weight: 600;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      transition: all 0.15s; text-decoration: none;
+    }
+    .btn-primary { background: var(--accent); border-color: var(--accent); color: #0d0f14; }
+    .btn-primary:hover { background: #f0c95a; border-color: #f0c95a; }
+    .btn-secondary { background: transparent; border-color: var(--border); color: var(--text); }
+    .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-danger { background: transparent; border-color: var(--danger); color: var(--danger); }
+    .btn-danger:hover { background: var(--danger); color: #fff; }
+    .btn-accent2 { background: var(--accent2); border-color: var(--accent2); color: #0d0f14; }
+    .btn-accent2:hover { background: #5ef5ca; }
+    .btn-sm { padding: 6px 14px; font-size: 11px; }
+
+    .btn-row { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+
+    /* ── CAMERA PANEL ── */
+    .camera-panel {
+      border: 1px solid var(--border);
+      background: var(--panel);
+      padding: 0;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+    .camera-panel-header {
+      padding: 12px 18px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      background: #161922;
+    }
+    .camera-panel-header span {
+      font-family: var(--font-mono); font-size: 11px; color: var(--accent); letter-spacing: 0.08em;
+    }
+    .camera-panel-body { padding: 18px; }
+    #qr-reader { width: 100% !important; border: none !important; }
+    #qr-reader video { border: none !important; border-radius: 0 !important; }
+    /* Override html5-qrcode default styles */
+    #qr-reader__scan_region { border: 2px dashed var(--accent) !important; background: transparent !important; }
+    #qr-reader__scan_region img { display:none !important; }
+    #qr-reader__dashboard { background: var(--panel) !important; padding: 0 !important; }
+    #qr-reader__dashboard_section_csr button { font-family: var(--font-ui) !important; }
+
+    .scan-result {
+      margin-top: 14px; padding: 14px;
+      background: #0d2e1e; border: 1px solid var(--accent2);
+      font-family: var(--font-mono); font-size: 13px; color: var(--accent2);
+      word-break: break-all;
+    }
+    .scan-placeholder {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 10px; padding: 40px 20px;
+      border: 2px dashed var(--border); color: var(--muted);
+      font-size: 13px; text-align: center;
+    }
+    .scan-placeholder .icon { font-size: 36px; opacity: 0.4; }
+
+    /* ── QR DOWNLOAD SECTION ── */
+    .qr-box {
+      border: 1px solid var(--border);
+      background: var(--panel);
+      padding: 22px;
+      display: flex; flex-direction: column; align-items: center; gap: 16px;
+      margin-bottom: 20px;
+    }
+    .qr-box .qr-title {
+      font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted);
+      align-self: flex-start;
+    }
+    #qr-display canvas, #qr-display img { border: 6px solid #fff; display: block; }
+    .qr-info {
+      font-family: var(--font-mono); font-size: 11px; color: var(--muted); text-align: center;
+    }
+
+    /* ── MODAL / OVERLAY ── */
+    .modal-backdrop {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 500;
+      display: flex; align-items: center; justify-content: center;
+      animation: fadeIn 0.15s ease;
+    }
+    @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+    .modal {
+      background: var(--panel); border: 1px solid var(--border);
+      width: 100%; max-width: 480px; margin: 20px;
+      animation: slideUp 0.2s ease;
+    }
+    @keyframes slideUp { from{transform:translateY(20px);opacity:0} to{transform:translateY(0);opacity:1} }
+    .modal-header {
+      padding: 16px 20px; border-bottom: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .modal-header h3 { font-size: 14px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+    .modal-close { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 20px; line-height: 1; }
+    .modal-close:hover { color: #fff; }
+    .modal-body { padding: 20px; }
+    .modal-footer { padding: 14px 20px; border-top: 1px solid var(--border); display: flex; gap: 10px; justify-content: flex-end; }
+
+    /* ── FORM ── */
+    .form-group { margin-bottom: 16px; }
+    .form-label { display: block; font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+    .form-control {
+      width: 100%; padding: 10px 12px;
+      background: var(--surface); border: 1px solid var(--border);
+      color: var(--text); font-family: var(--font-ui); font-size: 14px;
+      outline: none; transition: border-color 0.15s;
+    }
+    .form-control:focus { border-color: var(--accent); }
+    .form-control option { background: var(--surface); }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    /* ── TABLE ── */
+    .table-wrap { overflow-x: auto; margin-bottom: 20px; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    thead th {
+      text-align: left; padding: 10px 14px;
+      font-size: 10px; font-weight: 600; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--muted);
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+    }
+    tbody tr { border-bottom: 1px solid #1e2230; transition: background 0.1s; }
+    tbody tr:hover { background: #1e2230; }
+    tbody td { padding: 11px 14px; font-family: var(--font-mono); font-size: 12px; }
+    .badge {
+      display: inline-block; padding: 2px 8px; font-size: 10px;
+      font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+    }
+    .badge-ok { background: rgba(75,232,184,0.12); color: var(--accent2); border: 1px solid rgba(75,232,184,0.3); }
+    .badge-low { background: rgba(232,184,75,0.12); color: var(--accent); border: 1px solid rgba(232,184,75,0.3); }
+    .badge-empty { background: rgba(232,75,75,0.12); color: var(--danger); border: 1px solid rgba(232,75,75,0.3); }
+
+    /* ── MARKETING ── */
+    .mkt-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .mkt-card {
+      background: var(--panel); border: 1px solid var(--border);
+      padding: 20px; cursor: pointer;
+      transition: border-color 0.2s, transform 0.15s;
+      position: relative; overflow: hidden;
+    }
+    .mkt-card:hover { border-color: var(--accent2); transform: translateY(-2px); }
+    .mkt-card::after {
+      content: '';
+      position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, var(--accent2), var(--accent));
+      transform: scaleX(0); transform-origin: left;
+      transition: transform 0.3s;
+    }
+    .mkt-card:hover::after { transform: scaleX(1); }
+    .mkt-card-icon { font-size: 28px; margin-bottom: 12px; }
+    .mkt-card-title { font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+    .mkt-card-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+    .chart-placeholder {
+      border: 1px solid var(--border); background: var(--panel);
+      padding: 20px; margin-bottom: 20px;
+    }
+    .chart-placeholder-header { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 16px; }
+    .bar-chart { display: flex; align-items: flex-end; gap: 8px; height: 100px; }
+    .bar {
+      flex: 1; background: linear-gradient(to top, var(--accent), rgba(232,184,75,0.3));
+      border-top: 2px solid var(--accent); position: relative;
+      transition: opacity 0.2s;
+    }
+    .bar:hover { opacity: 0.8; }
+    .bar-label { position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%); font-family: var(--font-mono); font-size: 9px; color: var(--muted); white-space: nowrap; }
+    .bar-val { position: absolute; top: -18px; left: 50%; transform: translateX(-50%); font-family: var(--font-mono); font-size: 9px; color: var(--accent); }
+    .chart-legend { display: flex; gap: 16px; margin-top: 28px; flex-wrap: wrap; }
+    .legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted); }
+    .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+    .export-row { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+
+    /* ── DIVIDER ── */
+    .divider { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
+
+    @keyframes shake {
+      0%,100%{transform:translateX(0)}
+      20%{transform:translateX(-8px)}
+      40%{transform:translateX(8px)}
+      60%{transform:translateX(-5px)}
+      80%{transform:translateX(5px)}
+    }
+
+    @media (max-width: 700px) {
+      .calendar-layout { grid-template-columns: 1fr !important; }
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); }
+    ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+    @media (max-width: 600px) {
+      .content { padding: 16px; }
+      .tab-btn { padding: 12px 14px; font-size: 11px; }
+      .section-title { font-size: 22px; }
+      .form-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+const { useState, useEffect, useRef, useCallback } = React;
+
+/* ── MOCK DATA ── */
+const INITIAL_STOCK = [
+  { id: 1, nombre: "Acero Inoxidable 304", tipo: "Metal",    peso: 12.5,  cantidad: 45,  qr: "STOCK-001" },
+  { id: 2, nombre: "Aluminio 6061",        tipo: "Metal",    peso: 3.2,   cantidad: 12,  qr: "STOCK-002" },
+  { id: 3, nombre: "PVC Rígido",           tipo: "Plástico", peso: 1.8,   cantidad: 0,   qr: "STOCK-003" },
+  { id: 4, nombre: "Cobre Electrolítico",  tipo: "Metal",    peso: 8.9,   cantidad: 7,   qr: "STOCK-004" },
+  { id: 5, nombre: "Polietileno HD",       tipo: "Plástico", peso: 0.95,  cantidad: 88,  qr: "STOCK-005" },
+  { id: 6, nombre: "Fibra de Carbono",     tipo: "Composite",peso: 1.6,   cantidad: 3,   qr: "STOCK-006" },
+];
+
+const TIPOS = ["Metal", "Plástico", "Composite", "Cerámico", "Electrónico", "Otro"];
+
+/* ── QR DOWNLOAD helper ── */
+function downloadQR(canvasOrImg, filename) {
+  const a = document.createElement('a');
+  if (canvasOrImg.tagName === 'CANVAS') {
+    a.href = canvasOrImg.toDataURL('image/png');
+  } else {
+    a.href = canvasOrImg.src;
+  }
+  a.download = filename || 'qr.png';
+  a.click();
+}
+
+/* ── GENERATE QR ── */
+function generateQRCode(containerId, text) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  el.innerHTML = '';
+  new QRCode(el, {
+    text: text,
+    width: 160,
+    height: 160,
+    colorDark: "#000000",
+    colorLight: "#ffffff",
+    correctLevel: QRCode.CorrectLevel.H
+  });
+}
+
+/* ══════════════════════════════════════════
+   STOCK PAGE
+══════════════════════════════════════════ */
+function StockPage() {
+  const [stock, setStock] = useState(INITIAL_STOCK);
+  const [scanning, setScanning] = useState(false);
+  const [scanResult, setScanResult] = useState(null);
+  const [scanError, setScanError] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [editItem, setEditItem] = useState(null);
+  const [showQRModal, setShowQRModal] = useState(null); // item
+  const qrScannerRef = useRef(null);
+  const qrDisplayRef = useRef(null);
+
+  const form = useRef({ nombre:'', tipo:'Metal', peso:'', cantidad:'' });
+
+  /* stats */
+  const total = stock.reduce((s,i) => s + i.cantidad, 0);
+  const tipos = [...new Set(stock.map(i => i.tipo))].length;
+  const bajo = stock.filter(i => i.cantidad > 0 && i.cantidad <= 10).length;
+  const agotado = stock.filter(i => i.cantidad === 0).length;
+
+  /* ── start QR scan ── */
+  const startScan = useCallback(async () => {
+    setScanError(null);
+    setScanResult(null);
+    setScanning(true);
+  }, []);
+
+  const stopScan = useCallback(() => {
+    if (qrScannerRef.current) {
+      qrScannerRef.current.stop().catch(()=>{});
+      qrScannerRef.current = null;
+    }
+    setScanning(false);
+  }, []);
+
+  useEffect(() => {
+    if (!scanning) return;
+    const scanner = new Html5Qrcode("qr-reader");
+    qrScannerRef.current = scanner;
+    scanner.start(
+      { facingMode: "environment" },
+      { fps: 10, qrbox: { width: 220, height: 220 } },
+      (text) => {
+        setScanResult(text);
+        scanner.stop().catch(()=>{});
+        qrScannerRef.current = null;
+        setScanning(false);
+      },
+      () => {}
+    ).catch(err => {
+      setScanError("No se pudo acceder a la cámara: " + err);
+      setScanning(false);
+    });
+    return () => {
+      scanner.stop().catch(()=>{});
+    };
+  }, [scanning]);
+
+  /* ── CSV download ── */
+  const downloadCSV = () => {
+    const header = "id,nombre,tipo,peso_kg,cantidad,qr\n";
+    const rows = stock.map(i => `${i.id},"${i.nombre}","${i.tipo}",${i.peso},${i.cantidad},"${i.qr}"`).join("\n");
+    const blob = new Blob([header + rows], { type: 'text/csv' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'engilab_stock.csv';
+    a.click();
+  };
+
+  /* ── Modal open ── */
+  const openAdd = () => {
+    setEditItem(null);
+    setShowModal(true);
+  };
+  const openEdit = (item) => {
+    setEditItem(item);
+    setShowModal(true);
+  };
+  const openQR = (item) => {
+    setShowQRModal(item);
+    setTimeout(() => generateQRCode('qr-display-modal', item.qr + ' | ' + item.nombre), 100);
+  };
+
+  const handleSave = (data) => {
+    if (editItem) {
+      setStock(s => s.map(i => i.id === editItem.id ? { ...i, ...data } : i));
+    } else {
+      const newId = Math.max(...stock.map(i=>i.id)) + 1;
+      setStock(s => [...s, { id: newId, qr: `STOCK-${String(newId).padStart(3,'0')}`, ...data }]);
+    }
+    setShowModal(false);
+  };
+
+  const handleDelete = (id) => {
+    setStock(s => s.filter(i => i.id !== id));
+  };
+
+  const statusBadge = (cantidad) => {
+    if (cantidad === 0) return <span className="badge badge-empty">Agotado</span>;
+    if (cantidad <= 10) return <span className="badge badge-low">Bajo</span>;
+    return <span className="badge badge-ok">OK</span>;
+  };
+
+  return (
+    <div>
+      {/* Header */}
+      <div className="section-header">
+        <div>
+          <div className="section-title">Stock</div>
+          <div className="section-subtitle">Gestión de inventario · Engilab</div>
+        </div>
+        <span className="section-badge">v1.0.0</span>
+      </div>
+
+      {/* Stats */}
+      <div className="card-grid">
+        <div className="card">
+          <div className="card-label">Total Unidades</div>
+          <div className="card-value">{total}</div>
+          <div className="card-sub">{stock.length} referencias activas</div>
+          <div className="card-accent-line" style={{'--fill':'80%'}}/>
+        </div>
+        <div className="card">
+          <div className="card-label">Tipos de Material</div>
+          <div className="card-value">{tipos}</div>
+          <div className="card-sub">Categorías distintas</div>
+          <div className="card-accent-line" style={{'--fill':'55%'}}/>
+        </div>
+        <div className="card">
+          <div className="card-label">Stock Bajo</div>
+          <div className="card-value" style={{color:'var(--accent)'}}>{bajo}</div>
+          <div className="card-sub">≤ 10 unidades</div>
+          <div className="card-accent-line" style={{'--fill':'30%', background:'var(--accent)'}}/>
+        </div>
+        <div className="card">
+          <div className="card-label">Agotados</div>
+          <div className="card-value" style={{color:'var(--danger)'}}>{agotado}</div>
+          <div className="card-sub">Referencias a reponer</div>
+          <div className="card-accent-line" style={{'--fill':'15%', background:'var(--danger)'}}/>
+        </div>
+      </div>
+
+      {/* Action buttons */}
+      <div className="btn-row">
+        <button className="btn btn-primary" onClick={openAdd}>＋ Añadir Material</button>
+        <button className="btn btn-secondary" onClick={downloadCSV}>⬇ Descargar BD (.csv)</button>
+      </div>
+
+      <hr className="divider" />
+
+      {/* QR Scanner */}
+      <div className="camera-panel">
+        <div className="camera-panel-header">
+          <span>▶ ESCANEAR QR</span>
+          {scanning && (
+            <button className="btn btn-sm btn-danger" onClick={stopScan}>■ Detener</button>
+          )}
+        </div>
+        <div className="camera-panel-body">
+          {!scanning && !scanResult && (
+            <div>
+              <div className="scan-placeholder">
+                <div className="icon">⬛</div>
+                <div>Activa la cámara para escanear un código QR de inventario</div>
+              </div>
+              <div style={{marginTop:14}}>
+                <button className="btn btn-accent2" onClick={startScan}>
+                  📷 Iniciar Escáner
+                </button>
+              </div>
+            </div>
+          )}
+          {scanning && (
+            <div>
+              <div id="qr-reader" style={{width:'100%', maxWidth:400}} />
+              <div style={{marginTop:12, fontFamily:'var(--font-mono)', fontSize:11, color:'var(--muted)'}}>
+                Apunta la cámara al código QR del material...
+              </div>
+            </div>
+          )}
+          {!scanning && scanResult && (
+            <div>
+              <div className="scan-result">
+                <div style={{fontSize:10, letterSpacing:'0.1em', textTransform:'uppercase', marginBottom:6, color:'var(--muted)'}}>Resultado:</div>
+                {scanResult}
+              </div>
+              <div style={{marginTop:12}} className="btn-row">
+                <button className="btn btn-accent2 btn-sm" onClick={startScan}>⟳ Nuevo Escaneo</button>
+                <button className="btn btn-secondary btn-sm" onClick={() => setScanResult(null)}>✕ Limpiar</button>
+              </div>
+            </div>
+          )}
+          {scanError && (
+            <div style={{color:'var(--danger)', fontFamily:'var(--font-mono)', fontSize:12, marginTop:10}}>{scanError}</div>
+          )}
+        </div>
+      </div>
+
+      <hr className="divider" />
+
+      {/* Table */}
+      <div style={{display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:12}}>
+        <span style={{fontSize:11, letterSpacing:'0.1em', textTransform:'uppercase', color:'var(--muted)'}}>Base de datos — {stock.length} registros</span>
+      </div>
+      <div className="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Nombre</th>
+              <th>Tipo</th>
+              <th>Peso (kg)</th>
+              <th>Cantidad</th>
+              <th>Estado</th>
+              <th>QR</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {stock.map(item => (
+              <tr key={item.id}>
+                <td style={{color:'var(--muted)'}}>{String(item.id).padStart(3,'0')}</td>
+                <td style={{color:'#fff', fontFamily:'var(--font-ui)', fontWeight:600}}>{item.nombre}</td>
+                <td>{item.tipo}</td>
+                <td>{item.peso}</td>
+                <td>{item.cantidad}</td>
+                <td>{statusBadge(item.cantidad)}</td>
+                <td style={{color:'var(--accent)'}}>{item.qr}</td>
+                <td>
+                  <div style={{display:'flex', gap:6}}>
+                    <button className="btn btn-sm btn-secondary" onClick={() => openEdit(item)}>✎ Edit</button>
+                    <button className="btn btn-sm btn-accent2" onClick={() => openQR(item)}>QR</button>
+                    <button className="btn btn-sm btn-danger" onClick={() => handleDelete(item.id)}>✕</button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Edit/Add Modal */}
+      {showModal && (
+        <ItemModal
+          item={editItem}
+          tipos={TIPOS}
+          onSave={handleSave}
+          onClose={() => setShowModal(false)}
+        />
+      )}
+
+      {/* QR Modal */}
+      {showQRModal && (
+        <QRModal
+          item={showQRModal}
+          onClose={() => setShowQRModal(null)}
+        />
+      )}
+    </div>
+  );
+}
+
+/* ── Item Modal ── */
+function ItemModal({ item, tipos, onSave, onClose }) {
+  const [nombre, setNombre] = useState(item?.nombre || '');
+  const [tipo, setTipo] = useState(item?.tipo || 'Metal');
+  const [peso, setPeso] = useState(item?.peso || '');
+  const [cantidad, setCantidad] = useState(item?.cantidad ?? '');
+
+  const submit = () => {
+    if (!nombre || !peso || cantidad === '') return;
+    onSave({ nombre, tipo, peso: parseFloat(peso), cantidad: parseInt(cantidad) });
+  };
+
+  return (
+    <div className="modal-backdrop" onClick={e => e.target===e.currentTarget && onClose()}>
+      <div className="modal">
+        <div className="modal-header">
+          <h3>{item ? 'Editar Material' : 'Nuevo Material'}</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        <div className="modal-body">
+          <div className="form-group">
+            <label className="form-label">Nombre del Material</label>
+            <input className="form-control" value={nombre} onChange={e=>setNombre(e.target.value)} placeholder="Ej: Acero Inoxidable 316" />
+          </div>
+          <div className="form-group">
+            <label className="form-label">Tipo</label>
+            <select className="form-control" value={tipo} onChange={e=>setTipo(e.target.value)}>
+              {tipos.map(t => <option key={t}>{t}</option>)}
+            </select>
+          </div>
+          <div className="form-row">
+            <div className="form-group">
+              <label className="form-label">Peso (kg)</label>
+              <input className="form-control" type="number" step="0.01" value={peso} onChange={e=>setPeso(e.target.value)} placeholder="0.00" />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Cantidad</label>
+              <input className="form-control" type="number" value={cantidad} onChange={e=>setCantidad(e.target.value)} placeholder="0" />
+            </div>
+          </div>
+        </div>
+        <div className="modal-footer">
+          <button className="btn btn-secondary" onClick={onClose}>Cancelar</button>
+          <button className="btn btn-primary" onClick={submit}>Guardar</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── QR Modal ── */
+function QRModal({ item, onClose }) {
+  useEffect(() => {
+    setTimeout(() => generateQRCode('qr-display-modal', `${item.qr} | ${item.nombre} | ${item.tipo} | ${item.peso}kg | Qty:${item.cantidad}`), 120);
+  }, [item]);
+
+  const handleDownload = () => {
+    const el = document.getElementById('qr-display-modal');
+    const canvas = el.querySelector('canvas');
+    const img = el.querySelector('img');
+    if (canvas) downloadQR(canvas, `QR_${item.qr}.png`);
+    else if (img) downloadQR(img, `QR_${item.qr}.png`);
+  };
+
+  return (
+    <div className="modal-backdrop" onClick={e => e.target===e.currentTarget && onClose()}>
+      <div className="modal">
+        <div className="modal-header">
+          <h3>Código QR · {item.qr}</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        <div className="modal-body" style={{display:'flex', flexDirection:'column', alignItems:'center', gap:16}}>
+          <div id="qr-display-modal" style={{background:'#fff', padding:12}} />
+          <div style={{fontFamily:'var(--font-mono)', fontSize:11, color:'var(--muted)', textAlign:'center'}}>
+            {item.nombre}<br/>{item.tipo} · {item.peso} kg · {item.cantidad} uds
+          </div>
+          <div style={{fontSize:11, color:'var(--muted)', textAlign:'center', lineHeight:1.6}}>
+            Este QR es generado en el cliente como preview.<br />
+            En producción, el backend Python enviará el QR oficial.
+          </div>
+        </div>
+        <div className="modal-footer">
+          <button className="btn btn-secondary" onClick={onClose}>Cerrar</button>
+          <button className="btn btn-primary" onClick={handleDownload}>⬇ Descargar QR</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════
+   MARKETING PAGE
+══════════════════════════════════════════ */
+const MKT_MONTHS = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago'];
+const MKT_VALS   = [23, 41, 35, 58, 47, 72, 65, 88];
+const CATALOG = [
+  { id:'M01', nombre:'Pernos Especiales DIN', cat:'Fijación',   precio:'€ 0.45/u', stock:480 },
+  { id:'M02', nombre:'Varilla Roscada M10',   cat:'Fijación',   precio:'€ 2.10/m', stock:120 },
+  { id:'M03', nombre:'Brida DN50 Inox',       cat:'Tuberías',   precio:'€ 18.00/u',stock:34  },
+  { id:'M04', nombre:'Placa Base 200x200',    cat:'Estructural',precio:'€ 45.00/u',stock:8   },
+];
+
+function MarketingPage() {
+  const [showCatalog, setShowCatalog] = useState(false);
+  const [showQRMkt, setShowQRMkt] = useState(false);
+  const [qrMktText, setQrMktText] = useState('https://engilab.upc.edu/catalogo');
+
+  const maxVal = Math.max(...MKT_VALS);
+
+  const downloadReport = (format) => {
+    const content = format === 'csv'
+      ? 'mes,solicitudes\n' + MKT_MONTHS.map((m,i)=>`${m},${MKT_VALS[i]}`).join('\n')
+      : JSON.stringify({ meses: MKT_MONTHS, solicitudes: MKT_VALS, catalogo: CATALOG }, null, 2);
+    const blob = new Blob([content], { type: format==='csv'?'text/csv':'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `engilab_marketing.${format}`;
+    a.click();
+  };
+
+  useEffect(() => {
+    if (showQRMkt) {
+      setTimeout(() => generateQRCode('qr-mkt-preview', qrMktText), 120);
+    }
+  }, [showQRMkt, qrMktText]);
+
+  const handleQRDownload = () => {
+    const el = document.getElementById('qr-mkt-preview');
+    if (!el) return;
+    const canvas = el.querySelector('canvas');
+    const img = el.querySelector('img');
+    if (canvas) downloadQR(canvas, 'QR_Marketing.png');
+    else if (img) downloadQR(img, 'QR_Marketing.png');
+  };
+
+  return (
+    <div>
+      <div className="section-header">
+        <div>
+          <div className="section-title">Marketing</div>
+          <div className="section-subtitle">Catálogo · Métricas · Exportación</div>
+        </div>
+        <span className="section-badge" style={{color:'var(--accent2)', border:'1px solid var(--accent2)'}}>
+          ACTIVO
+        </span>
+      </div>
+
+      {/* Feature cards */}
+      <div className="mkt-grid">
+        <div className="mkt-card" onClick={() => setShowCatalog(true)}>
+          <div className="mkt-card-icon">📦</div>
+          <div className="mkt-card-title">Catálogo de Productos</div>
+          <div className="mkt-card-desc">Ver y gestionar los materiales disponibles para comercialización.</div>
+        </div>
+        <div className="mkt-card" onClick={() => setShowQRMkt(true)}>
+          <div className="mkt-card-icon">⬛</div>
+          <div className="mkt-card-title">QR de Marketing</div>
+          <div className="mkt-card-desc">Genera y descarga códigos QR para campañas, fichas y etiquetas.</div>
+        </div>
+        <div className="mkt-card" onClick={() => document.getElementById('stats-section')?.scrollIntoView({behavior:'smooth'})}>
+          <div className="mkt-card-icon">📊</div>
+          <div className="mkt-card-title">Estadísticas</div>
+          <div className="mkt-card-desc">Evolución de solicitudes y métricas del inventario activo.</div>
+        </div>
+        <div className="mkt-card" onClick={() => document.getElementById('export-section')?.scrollIntoView({behavior:'smooth'})}>
+          <div className="mkt-card-icon">📥</div>
+          <div className="mkt-card-title">Exportar Informes</div>
+          <div className="mkt-card-desc">Descarga informes en CSV o JSON listos para presentar.</div>
+        </div>
+      </div>
+
+      <hr className="divider" />
+
+      {/* Calendar */}
+      <Calendar />
+
+      <hr className="divider" />
+
+      <div id="stats-section">
+        <div style={{fontSize:11, letterSpacing:'0.1em', textTransform:'uppercase', color:'var(--muted)', marginBottom:16}}>
+          Solicitudes Mensuales — 2024
+        </div>
+        <div className="chart-placeholder">
+          <div className="bar-chart">
+            {MKT_VALS.map((v, i) => (
+              <div key={i} className="bar" style={{height: `${(v/maxVal)*100}%`}}>
+                <span className="bar-val">{v}</span>
+                <span className="bar-label">{MKT_MONTHS[i]}</span>
+              </div>
+            ))}
+          </div>
+          <div className="chart-legend">
+            <div className="legend-item"><div className="legend-dot" style={{background:'var(--accent)'}}></div>Solicitudes</div>
+            <div className="legend-item"><div className="legend-dot" style={{background:'var(--accent2)'}}></div>Objetivo: 90</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Summary stats */}
+      <div className="card-grid" style={{marginBottom:24}}>
+        <div className="card">
+          <div className="card-label">Total Solicitudes YTD</div>
+          <div className="card-value">{MKT_VALS.reduce((a,b)=>a+b,0)}</div>
+          <div className="card-sub">Enero – Agosto 2024</div>
+        </div>
+        <div className="card">
+          <div className="card-label">Media Mensual</div>
+          <div className="card-value">{Math.round(MKT_VALS.reduce((a,b)=>a+b,0)/MKT_VALS.length)}</div>
+          <div className="card-sub">Solicitudes / mes</div>
+        </div>
+        <div className="card">
+          <div className="card-label">Mejor Mes</div>
+          <div className="card-value" style={{color:'var(--accent2)'}}>Ago</div>
+          <div className="card-sub">88 solicitudes</div>
+        </div>
+      </div>
+
+      <hr className="divider" />
+
+      {/* Export */}
+      <div id="export-section">
+        <div style={{fontSize:11, letterSpacing:'0.1em', textTransform:'uppercase', color:'var(--muted)', marginBottom:12}}>
+          Exportar Informes
+        </div>
+        <div className="export-row">
+          <button className="btn btn-primary" onClick={() => downloadReport('csv')}>⬇ Informe CSV</button>
+          <button className="btn btn-secondary" onClick={() => downloadReport('json')}>⬇ Informe JSON</button>
+        </div>
+      </div>
+
+      {/* Catalog Modal */}
+      {showCatalog && (
+        <div className="modal-backdrop" onClick={e => e.target===e.currentTarget && setShowCatalog(false)}>
+          <div className="modal" style={{maxWidth:600}}>
+            <div className="modal-header">
+              <h3>Catálogo de Productos</h3>
+              <button className="modal-close" onClick={() => setShowCatalog(false)}>×</button>
+            </div>
+            <div className="modal-body" style={{padding:0}}>
+              <table style={{fontSize:12}}>
+                <thead>
+                  <tr>
+                    <th>Ref.</th>
+                    <th>Producto</th>
+                    <th>Categoría</th>
+                    <th>Precio</th>
+                    <th>Stock</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {CATALOG.map(p => (
+                    <tr key={p.id}>
+                      <td style={{color:'var(--accent)'}}>{p.id}</td>
+                      <td style={{color:'#fff', fontFamily:'var(--font-ui)', fontWeight:600}}>{p.nombre}</td>
+                      <td>{p.cat}</td>
+                      <td style={{color:'var(--accent2)'}}>{p.precio}</td>
+                      <td>{p.stock}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div className="modal-footer">
+              <button className="btn btn-secondary" onClick={() => setShowCatalog(false)}>Cerrar</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* QR Marketing Modal */}
+      {showQRMkt && (
+        <div className="modal-backdrop" onClick={e => e.target===e.currentTarget && setShowQRMkt(false)}>
+          <div className="modal">
+            <div className="modal-header">
+              <h3>QR de Marketing</h3>
+              <button className="modal-close" onClick={() => setShowQRMkt(false)}>×</button>
+            </div>
+            <div className="modal-body">
+              <div className="form-group">
+                <label className="form-label">Contenido del QR (URL o texto)</label>
+                <input
+                  className="form-control"
+                  value={qrMktText}
+                  onChange={e => {
+                    setQrMktText(e.target.value);
+                    setTimeout(() => generateQRCode('qr-mkt-preview', e.target.value), 200);
+                  }}
+                  placeholder="https://..."
+                />
+              </div>
+              <div style={{display:'flex', justifyContent:'center', margin:'16px 0'}}>
+                <div id="qr-mkt-preview" style={{background:'#fff', padding:12}} />
+              </div>
+              <div style={{fontSize:11, color:'var(--muted)', textAlign:'center'}}>
+                En producción, el backend Python generará el QR oficial con metadatos adicionales.
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button className="btn btn-secondary" onClick={() => setShowQRMkt(false)}>Cerrar</button>
+              <button className="btn btn-primary" onClick={handleQRDownload}>⬇ Descargar QR</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════
+   LOGIN MODAL
+══════════════════════════════════════════ */
+function LoginModal({ onSuccess, onClose }) {
+  const [user, setUser] = useState('');
+  const [pass, setPass] = useState('');
+  const [error, setError] = useState('');
+  const [shaking, setShaking] = useState(false);
+
+  const handleLogin = () => {
+    if (user === 'admin' && pass === 'engicontrasenya456') {
+      onSuccess();
+    } else {
+      setError('Credenciales incorrectas. Acceso denegado.');
+      setShaking(true);
+      setTimeout(() => setShaking(false), 500);
+    }
+  };
+
+  const handleKey = (e) => { if (e.key === 'Enter') handleLogin(); };
+
+  return (
+    <div className="modal-backdrop" onClick={e => e.target===e.currentTarget && onClose()}>
+      <div className="modal" style={{maxWidth:380, animation: shaking ? 'shake 0.4s ease' : 'slideUp 0.2s ease'}}>
+        <div className="modal-header" style={{borderBottom:'1px solid var(--border)', background:'#0d1117'}}>
+          <div style={{display:'flex', alignItems:'center', gap:10}}>
+            <div style={{
+              width:28, height:28, border:'1px solid var(--danger)',
+              display:'flex', alignItems:'center', justifyContent:'center',
+              fontSize:13, color:'var(--danger)'
+            }}>🔒</div>
+            <div>
+              <h3 style={{color:'var(--danger)', letterSpacing:'0.1em'}}>Acceso Restringido</h3>
+              <div style={{fontSize:10, color:'var(--muted)', letterSpacing:'0.06em', textTransform:'none', fontWeight:300, marginTop:2}}>
+                Módulo interno · Solo personal autorizado
+              </div>
+            </div>
+          </div>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        <div className="modal-body" style={{paddingTop:24}}>
+          <div style={{
+            background:'rgba(232,75,75,0.05)', border:'1px solid rgba(232,75,75,0.15)',
+            padding:'10px 14px', marginBottom:20,
+            fontFamily:'var(--font-mono)', fontSize:11, color:'var(--muted)', lineHeight:1.6
+          }}>
+            Este módulo contiene datos de inventario interno.<br/>
+            Introduce tus credenciales para continuar.
+          </div>
+          <div className="form-group">
+            <label className="form-label">Usuario</label>
+            <input
+              className="form-control" value={user}
+              onChange={e => { setUser(e.target.value); setError(''); }}
+              onKeyDown={handleKey}
+              placeholder="usuario"
+              autoFocus
+            />
+          </div>
+          <div className="form-group">
+            <label className="form-label">Contraseña</label>
+            <input
+              className="form-control" type="password" value={pass}
+              onChange={e => { setPass(e.target.value); setError(''); }}
+              onKeyDown={handleKey}
+              placeholder="••••••••••••"
+            />
+          </div>
+          {error && (
+            <div style={{
+              fontFamily:'var(--font-mono)', fontSize:11, color:'var(--danger)',
+              background:'rgba(232,75,75,0.08)', border:'1px solid rgba(232,75,75,0.25)',
+              padding:'8px 12px', marginTop:4
+            }}>
+              ⚠ {error}
+            </div>
+          )}
+        </div>
+        <div className="modal-footer">
+          <button className="btn btn-secondary" onClick={onClose}>Cancelar</button>
+          <button className="btn btn-primary" onClick={handleLogin}>Iniciar Sesión →</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════
+   CALENDAR COMPONENT
+══════════════════════════════════════════ */
+const CALENDAR_EVENTS = [
+  { date: '2026-02-18', title: 'Revisión de stock Q1',      type: 'stock' },
+  { date: '2026-02-20', title: 'Campaña lanzamiento Acero', type: 'campaign' },
+  { date: '2026-02-24', title: 'Reunión Engilab UPC',       type: 'meeting' },
+  { date: '2026-02-27', title: 'Entrega catálogo digital',  type: 'deadline' },
+  { date: '2026-03-03', title: 'Auditoría de materiales',   type: 'stock' },
+  { date: '2026-03-10', title: 'Campaña primavera',         type: 'campaign' },
+  { date: '2026-03-15', title: 'Presentación ETSEIB',       type: 'meeting' },
+];
+
+const EVENT_COLORS = {
+  stock:    { bg:'rgba(232,184,75,0.12)',  border:'rgba(232,184,75,0.4)',  text:'var(--accent)' },
+  campaign: { bg:'rgba(75,232,184,0.12)', border:'rgba(75,232,184,0.4)', text:'var(--accent2)' },
+  meeting:  { bg:'rgba(120,100,220,0.12)',border:'rgba(120,100,220,0.4)',text:'#a090ff' },
+  deadline: { bg:'rgba(232,75,75,0.12)',  border:'rgba(232,75,75,0.4)',  text:'var(--danger)' },
+};
+
+function Calendar() {
+  const today = new Date();
+  const [viewDate, setViewDate] = useState(new Date(today.getFullYear(), today.getMonth(), 1));
+  const [selected, setSelected] = useState(null);
+  const [events, setEvents] = useState(CALENDAR_EVENTS);
+  const [showAddEvent, setShowAddEvent] = useState(false);
+  const [newEvent, setNewEvent] = useState({ title:'', type:'meeting' });
+
+  const year = viewDate.getFullYear();
+  const month = viewDate.getMonth();
+  const monthNames = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  const dayNames = ['L','M','X','J','V','S','D'];
+
+  const firstDay = new Date(year, month, 1).getDay();
+  const offset = firstDay === 0 ? 6 : firstDay - 1; // Mon-first
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  const cells = [];
+  for (let i = 0; i < offset; i++) cells.push(null);
+  for (let d = 1; d <= daysInMonth; d++) cells.push(d);
+
+  const pad = n => String(n).padStart(2,'0');
+  const dateStr = (d) => `${year}-${pad(month+1)}-${pad(d)}`;
+  const todayStr = `${today.getFullYear()}-${pad(today.getMonth()+1)}-${pad(today.getDate())}`;
+
+  const getEvents = (d) => events.filter(e => e.date === dateStr(d));
+
+  const prevMonth = () => setViewDate(new Date(year, month - 1, 1));
+  const nextMonth = () => setViewDate(new Date(year, month + 1, 1));
+
+  const selectedEvents = selected ? getEvents(selected) : [];
+
+  const handleAddEvent = () => {
+    if (!newEvent.title || !selected) return;
+    setEvents(ev => [...ev, { date: dateStr(selected), title: newEvent.title, type: newEvent.type }]);
+    setNewEvent({ title:'', type:'meeting' });
+    setShowAddEvent(false);
+  };
+
+  const removeEvent = (idx) => {
+    const targetDate = dateStr(selected);
+    let count = 0;
+    setEvents(ev => ev.filter(e => {
+      if (e.date === targetDate) {
+        if (count === idx) { count++; return false; }
+        count++;
+      }
+      return true;
+    }));
+  };
+
+  return (
+    <div style={{marginBottom:24}}>
+      <div style={{fontSize:11, letterSpacing:'0.1em', textTransform:'uppercase', color:'var(--muted)', marginBottom:14}}>
+        Calendario de Actividades
+      </div>
+      <div style={{display:'grid', gridTemplateColumns:'1fr 300px', gap:16}} className="calendar-layout">
+        {/* Calendar grid */}
+        <div style={{background:'var(--panel)', border:'1px solid var(--border)'}}>
+          {/* Nav */}
+          <div style={{
+            display:'flex', alignItems:'center', justifyContent:'space-between',
+            padding:'14px 18px', borderBottom:'1px solid var(--border)', background:'#161922'
+          }}>
+            <button className="btn btn-sm btn-secondary" onClick={prevMonth} style={{padding:'4px 10px'}}>‹</button>
+            <span style={{fontFamily:'var(--font-mono)', fontSize:13, color:'#fff', letterSpacing:'0.06em'}}>
+              {monthNames[month]} {year}
+            </span>
+            <button className="btn btn-sm btn-secondary" onClick={nextMonth} style={{padding:'4px 10px'}}>›</button>
+          </div>
+          {/* Day headers */}
+          <div style={{display:'grid', gridTemplateColumns:'repeat(7,1fr)', borderBottom:'1px solid var(--border)'}}>
+            {dayNames.map(d => (
+              <div key={d} style={{
+                textAlign:'center', padding:'8px 4px',
+                fontFamily:'var(--font-mono)', fontSize:10,
+                color:'var(--muted)', letterSpacing:'0.08em'
+              }}>{d}</div>
+            ))}
+          </div>
+          {/* Cells */}
+          <div style={{display:'grid', gridTemplateColumns:'repeat(7,1fr)'}}>
+            {cells.map((day, i) => {
+              if (!day) return <div key={`e${i}`} style={{minHeight:52, borderRight:'1px solid #1a1e28', borderBottom:'1px solid #1a1e28'}} />;
+              const ds = dateStr(day);
+              const dayEvents = getEvents(day);
+              const isToday = ds === todayStr;
+              const isSel = selected === day;
+              return (
+                <div
+                  key={day}
+                  onClick={() => setSelected(day === selected ? null : day)}
+                  style={{
+                    minHeight:52, padding:'6px 6px 4px',
+                    borderRight:'1px solid #1a1e28', borderBottom:'1px solid #1a1e28',
+                    cursor:'pointer',
+                    background: isSel ? 'rgba(232,184,75,0.08)' : 'transparent',
+                    transition:'background 0.15s',
+                    position:'relative'
+                  }}
+                >
+                  <div style={{
+                    width:22, height:22, borderRadius:'50%',
+                    display:'flex', alignItems:'center', justifyContent:'center',
+                    fontFamily:'var(--font-mono)', fontSize:11,
+                    background: isToday ? 'var(--accent)' : 'transparent',
+                    color: isToday ? '#0d0f14' : isSel ? 'var(--accent)' : 'var(--text)',
+                    fontWeight: isToday ? 700 : 400,
+                    marginBottom:2
+                  }}>{day}</div>
+                  <div style={{display:'flex', flexDirection:'column', gap:2}}>
+                    {dayEvents.slice(0,2).map((ev, ei) => {
+                      const col = EVENT_COLORS[ev.type] || EVENT_COLORS.meeting;
+                      return (
+                        <div key={ei} style={{
+                          fontSize:9, background:col.bg, color:col.text,
+                          padding:'1px 4px', borderLeft:`2px solid ${col.border}`,
+                          whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis',
+                          lineHeight:1.4
+                        }}>{ev.title}</div>
+                      );
+                    })}
+                    {dayEvents.length > 2 && (
+                      <div style={{fontSize:9, color:'var(--muted)'}}>+{dayEvents.length-2} más</div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Side panel */}
+        <div style={{display:'flex', flexDirection:'column', gap:12}}>
+          {/* Legend */}
+          <div style={{background:'var(--panel)', border:'1px solid var(--border)', padding:14}}>
+            <div style={{fontSize:10, letterSpacing:'0.1em', textTransform:'uppercase', color:'var(--muted)', marginBottom:10}}>Tipos de evento</div>
+            {Object.entries(EVENT_COLORS).map(([type, col]) => (
+              <div key={type} style={{display:'flex', alignItems:'center', gap:8, marginBottom:6}}>
+                <div style={{width:10, height:10, background:col.bg, border:`1px solid ${col.border}`}} />
+                <span style={{fontSize:11, color:col.text, textTransform:'capitalize'}}>{type === 'stock' ? 'Inventario' : type === 'campaign' ? 'Campaña' : type === 'meeting' ? 'Reunión' : 'Entrega'}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* Selected day panel */}
+          <div style={{background:'var(--panel)', border:'1px solid var(--border)', padding:14, flex:1}}>
+            {selected ? (
+              <>
+                <div style={{
+                  fontFamily:'var(--font-mono)', fontSize:12, color:'var(--accent)',
+                  marginBottom:10, letterSpacing:'0.06em'
+                }}>
+                  {pad(selected)} / {pad(month+1)} / {year}
+                </div>
+                {selectedEvents.length === 0 && (
+                  <div style={{fontSize:12, color:'var(--muted)', marginBottom:12}}>Sin eventos este día.</div>
+                )}
+                {selectedEvents.map((ev, i) => {
+                  const col = EVENT_COLORS[ev.type] || EVENT_COLORS.meeting;
+                  return (
+                    <div key={i} style={{
+                      background:col.bg, border:`1px solid ${col.border}`,
+                      padding:'8px 10px', marginBottom:6,
+                      display:'flex', justifyContent:'space-between', alignItems:'flex-start'
+                    }}>
+                      <div>
+                        <div style={{fontSize:12, color:col.text, fontWeight:600, marginBottom:2}}>{ev.title}</div>
+                        <div style={{fontSize:10, color:'var(--muted)', textTransform:'capitalize'}}>{ev.type}</div>
+                      </div>
+                      <button onClick={() => removeEvent(i)} style={{
+                        background:'none', border:'none', color:'var(--muted)',
+                        cursor:'pointer', fontSize:14, lineHeight:1, padding:0
+                      }}>×</button>
+                    </div>
+                  );
+                })}
+                {!showAddEvent ? (
+                  <button className="btn btn-sm btn-secondary" style={{width:'100%', marginTop:4}} onClick={() => setShowAddEvent(true)}>
+                    + Añadir evento
+                  </button>
+                ) : (
+                  <div style={{marginTop:8}}>
+                    <input
+                      className="form-control" style={{marginBottom:6, fontSize:12}}
+                      value={newEvent.title}
+                      onChange={e => setNewEvent(n => ({...n, title:e.target.value}))}
+                      placeholder="Título del evento"
+                    />
+                    <select
+                      className="form-control" style={{marginBottom:8, fontSize:12}}
+                      value={newEvent.type}
+                      onChange={e => setNewEvent(n => ({...n, type:e.target.value}))}
+                    >
+                      <option value="meeting">Reunión</option>
+                      <option value="campaign">Campaña</option>
+                      <option value="stock">Inventario</option>
+                      <option value="deadline">Entrega</option>
+                    </select>
+                    <div style={{display:'flex', gap:6}}>
+                      <button className="btn btn-sm btn-primary" style={{flex:1}} onClick={handleAddEvent}>Guardar</button>
+                      <button className="btn btn-sm btn-secondary" onClick={() => setShowAddEvent(false)}>✕</button>
+                    </div>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div style={{fontSize:12, color:'var(--muted)', lineHeight:1.6}}>
+                Selecciona un día en el calendario para ver o añadir eventos.
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════
+   APP ROOT
+══════════════════════════════════════════ */
+function App() {
+  const [tab, setTab] = useState('marketing');
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const now = new Date().toLocaleString('es-ES', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' });
+
+  const handleStockClick = () => {
+    if (isAuthenticated) { setTab('stock'); }
+    else { setShowLoginModal(true); }
+  };
+
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    setTab('marketing');
+  };
+
+  return (
+    <div id="root-inner">
+      {/* Header */}
+      <header className="header">
+        <div className="header-brand">
+          <div className="logo-mark">EL</div>
+          <div>
+            <h1>Engilab</h1>
+            <span>ETSEIB · UPC</span>
+          </div>
+        </div>
+        <div style={{display:'flex', alignItems:'center', gap:16}}>
+          {isAuthenticated && (
+            <div style={{display:'flex', alignItems:'center', gap:10}}>
+              <span style={{fontFamily:'var(--font-mono)', fontSize:10, color:'var(--accent2)', letterSpacing:'0.08em'}}>
+                🔓 admin
+              </span>
+              <button className="btn btn-sm btn-danger" onClick={handleLogout} style={{padding:'4px 10px', fontSize:10}}>
+                Cerrar sesión
+              </button>
+            </div>
+          )}
+          <div className="header-info">
+            <span className="dot"></span>
+            Sistema activo · {now}
+          </div>
+        </div>
+      </header>
+
+      {/* Tab bar */}
+      <nav className="tab-bar">
+        <button
+          className={`tab-btn ${tab==='marketing'?'active':''}`}
+          onClick={() => setTab('marketing')}
+        >
+          <span className="tab-icon">◈</span>Marketing
+        </button>
+        <button
+          className={`tab-btn ${tab==='stock'?'active':''}`}
+          onClick={handleStockClick}
+          style={{position:'relative'}}
+        >
+          <span className="tab-icon">⬛</span>Stock
+          {!isAuthenticated && (
+            <span style={{
+              marginLeft:6, fontSize:10, color:'var(--muted)',
+              fontFamily:'var(--font-mono)', verticalAlign:'middle'
+            }}>🔒</span>
+          )}
+        </button>
+      </nav>
+
+      {/* Content */}
+      <main className="content">
+        {tab === 'marketing' && <MarketingPage />}
+        {tab === 'stock' && isAuthenticated && <StockPage />}
+      </main>
+
+      {/* Login Modal */}
+      {showLoginModal && (
+        <LoginModal
+          onSuccess={() => { setIsAuthenticated(true); setShowLoginModal(false); setTab('stock'); }}
+          onClose={() => setShowLoginModal(false)}
+        />
+      )}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
