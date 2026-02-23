@@ -1,175 +1,171 @@
 <!DOCTYPE html>
-<html>
-<head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<style>
-body {font-family: Arial, Helvetica, sans-serif;}
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Engilab ETSEIB</title>
 
-/* Full-width input fields */
-input[type=text], input[type=password] {
-  width: 100%;
-  padding: 12px 20px;
-  margin: 8px 0;
-  display: inline-block;
-  border: 1px solid #ccc;
-  box-sizing: border-box;
-}
+    <!-- UPC stylesheets first -->
+    <link rel="stylesheet" type="text/css" href="https://www.upc.edu/++plone++production/++unique++2026-01-26T16:39:10.719273/default.css" data-bundle="production">
+    <link rel="stylesheet" type="text/css" href="https://www.upc.edu/++theme++homeupc/assets/css/homeupc-compiled.css?version=2020-02-13%2000%3A00%3A00.000003" data-bundle="homeupc">
+    <link rel="stylesheet" type="text/css" href="https://www.upc.edu/++theme++homeupc/assets/css/upc.css?version=2026-01-26%2011%3A00%3A00" data-bundle="upc-styles">
 
-/* Set a style for all buttons */
-button {
-  background-color: #04AA6D;
-  color: white;
-  padding: 14px 20px;
-  margin: 8px 0;
-  border: none;
-  cursor: pointer;
-  width: 100%;
-}
+    <!-- Your stylesheet LAST so it overrides UPC styles -->
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
 
-button:hover {
-  opacity: 0.8;
-}
+    <h1 style="text-align: center; background-color: #003366; color: white; margin: 0; height: 80px; line-height: 80px;">
+      Engilab
+    </h1>
 
-/* Extra styles for the cancel button */
-.cancelbtn {
-  width: auto;
-  padding: 10px 18px;
-  background-color: #f44336;
-}
-
-/* Center the image and position the close button */
-.imgcontainer {
-  text-align: center;
-  margin: 24px 0 12px 0;
-  position: relative;
-}
-
-img.avatar {
-  width: 40%;
-  border-radius: 50%;
-}
-
-.container {
-  padding: 16px;
-}
-
-span.psw {
-  float: right;
-  padding-top: 16px;
-}
-
-/* The Modal (background) */
-.modal {
-  display: none; /* Hidden by default */
-  position: fixed; /* Stay in place */
-  z-index: 1; /* Sit on top */
-  left: 0;
-  top: 0;
-  width: 100%; /* Full width */
-  height: 100%; /* Full height */
-  overflow: auto; /* Enable scroll if needed */
-  background-color: rgb(0,0,0); /* Fallback color */
-  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
-  padding-top: 60px;
-}
-
-/* Modal Content/Box */
-.modal-content {
-  background-color: #fefefe;
-  margin: 5% auto 15% auto; /* 5% from the top, 15% from the bottom and centered */
-  border: 1px solid #888;
-  width: 80%; /* Could be more or less, depending on screen size */
-}
-
-/* The Close Button (x) */
-.close {
-  position: absolute;
-  right: 25px;
-  top: 0;
-  color: #000;
-  font-size: 35px;
-  font-weight: bold;
-}
-
-.close:hover,
-.close:focus {
-  color: red;
-  cursor: pointer;
-}
-
-/* Add Zoom Animation */
-.animate {
-  -webkit-animation: animatezoom 0.6s;
-  animation: animatezoom 0.6s
-}
-
-@-webkit-keyframes animatezoom {
-  from {-webkit-transform: scale(0)} 
-  to {-webkit-transform: scale(1)}
-}
-  
-@keyframes animatezoom {
-  from {transform: scale(0)} 
-  to {transform: scale(1)}
-}
-
-/* Change styles for span and cancel button on extra small screens */
-@media screen and (max-width: 300px) {
-  span.psw {
-     display: block;
-     float: none;
-  }
-  .cancelbtn {
-     width: 100%;
-  }
-}
-</style>
-</head>
-<body>
-
-<h2>Modal Login Form</h2>
-
-<button onclick="document.getElementById('id01').style.display='block'" style="width:auto;">Login</button>
-
-<div id="id01" class="modal">
-  
-  <form class="modal-content animate" action="/action_page.php" method="post">
-    <div class="imgcontainer">
-      <span onclick="document.getElementById('id01').style.display='none'" class="close" title="Close Modal">&times;</span>
-      <img src="img_avatar2.png" alt="Avatar" class="avatar">
+    <div>
+      <img
+        src="https://media.istockphoto.com/id/1907248074/es/foto/impresora-3d-con-un-objeto-impreso-sobre-la-mesa.jpg?s=612x612&w=0&k=20&c=ZYnKnyR75XR_8EaZoeEAE-aytb91FcS14iZOJ8MyUtc="
+        alt="3D printer on a table"
+        style="width: 100%; height: 345px; object-fit: cover; display: block;">
     </div>
 
-    <div class="container">
-      <label for="uname"><b>Username</b></label>
-      <input type="text" placeholder="Enter Username" name="uname" required>
-
-      <label for="psw"><b>Password</b></label>
-      <input type="password" placeholder="Enter Password" name="psw" required>
-        
-      <button type="submit">Login</button>
-      <label>
-        <input type="checkbox" checked="checked" name="remember"> Remember me
-      </label>
+    <!-- Open login modal button -->
+    <div style="text-align:center; margin-top: 24px;">
+      <button class="open-btn" onclick="openModal()">Login</button>
     </div>
 
-    <div class="container" style="background-color:#f1f1f1">
-      <button type="button" onclick="document.getElementById('id01').style.display='none'" class="cancelbtn">Cancel</button>
-      <span class="psw">Forgot <a href="#">password?</a></span>
+    <!-- LOGIN MODAL -->
+    <div id="id01" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+
+      <span
+        onclick="closeModal()"
+        class="close"
+        title="Close Modal"
+        role="button"
+        tabindex="0"
+        onkeydown="if(event.key==='Enter'||event.key===' ')closeModal()"
+        aria-label="Close login modal">
+        &times;
+      </span>
+
+      <!--
+        SECURITY NOTES FOR BACKEND DEVELOPER:
+        1. This form must be served over HTTPS only.
+        2. Replace ACTION_URL with your real endpoint.
+        3. The server must:
+           - Generate a unique CSRF token per session and validate it on POST.
+           - Hash passwords with bcrypt (e.g. password_hash() in PHP).
+           - Never compare plaintext passwords.
+           - Implement rate limiting / account lockout on failed attempts.
+           - Set session cookies as HttpOnly, Secure, SameSite=Strict.
+           - If "remember me" is used, store a signed, random token in DB — never the password.
+      -->
+      <form
+        class="modal-content animate"
+        action="ACTION_URL"
+        method="POST"
+        id="loginForm"
+        onsubmit="return validateForm()">
+
+        <!-- CSRF Token: generate this server-side and inject it here -->
+        <!-- Example PHP: <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>"> -->
+        <input type="hidden" name="csrf_token" value="REPLACE_WITH_SERVER_GENERATED_TOKEN">
+
+        <div class="imgcontainer">
+          <!-- Generic user icon SVG — no broken image -->
+          <svg class="avatar" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" aria-hidden="true">
+            <circle cx="50" cy="50" r="50" fill="#003366"/>
+            <circle cx="50" cy="38" r="18" fill="#cce0ff"/>
+            <ellipse cx="50" cy="85" rx="28" ry="20" fill="#cce0ff"/>
+          </svg>
+          <h2 id="modal-title">Member Login</h2>
+        </div>
+
+        <div class="container">
+          <label for="uname"><b>Username</b></label>
+          <input
+            type="text"
+            id="uname"
+            placeholder="Enter Username"
+            name="uname"
+            autocomplete="username"
+            required
+            minlength="3"
+            maxlength="64"
+            pattern="[A-Za-z0-9_\-@\.]+"
+            title="Username may only contain letters, numbers, _, -, @, .">
+
+          <label for="psw"><b>Password</b></label>
+          <input
+            type="password"
+            id="psw"
+            placeholder="Enter Password"
+            name="psw"
+            autocomplete="current-password"
+            required
+            minlength="8"
+            maxlength="128">
+
+          <!-- Client-side feedback (server-side validation is also required!) -->
+          <div id="form-error" class="form-error" role="alert" aria-live="polite"></div>
+
+          <button type="submit">Login</button>
+
+          <label class="remember-label">
+            <input type="checkbox" name="remember"> Remember me
+            <span class="remember-hint">(stores a secure session token, not your password)</span>
+          </label>
+        </div>
+
+        <div class="container footer-container">
+          <button type="button" onclick="closeModal()" class="cancelbtn">Cancel</button>
+          <span class="psw">Forgot <a href="/reset-password">password?</a></span>
+        </div>
+
+      </form>
     </div>
-  </form>
-</div>
 
-<script>
-// Get the modal
-var modal = document.getElementById('id01');
+    <script>
+      function openModal() {
+        var modal = document.getElementById('id01');
+        modal.style.display = 'block';
+        // Focus first input for accessibility
+        setTimeout(function() {
+          document.getElementById('uname').focus();
+        }, 100);
+      }
 
-// When the user clicks anywhere outside of the modal, close it
-window.onclick = function(event) {
-    if (event.target == modal) {
-        modal.style.display = "none";
-    }
-}
-</script>
+      function closeModal() {
+        document.getElementById('id01').style.display = 'none';
+        document.getElementById('form-error').textContent = '';
+      }
 
-</body>
+      // Close modal if user clicks outside the form box
+      window.addEventListener('click', function(e) {
+        var modal = document.getElementById('id01');
+        if (e.target === modal) closeModal();
+      });
+
+      // Close modal on Escape key
+      window.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeModal();
+      });
+
+      // Basic client-side validation (MUST also be validated server-side)
+      function validateForm() {
+        var uname = document.getElementById('uname').value.trim();
+        var psw   = document.getElementById('psw').value;
+        var errorEl = document.getElementById('form-error');
+        errorEl.textContent = '';
+
+        if (uname.length < 3) {
+          errorEl.textContent = 'Username must be at least 3 characters.';
+          return false;
+        }
+        if (psw.length < 8) {
+          errorEl.textContent = 'Password must be at least 8 characters.';
+          return false;
+        }
+        return true;
+      }
+    </script>
+
+  </body>
 </html>
