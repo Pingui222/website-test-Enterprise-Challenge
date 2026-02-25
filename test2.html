@@ -4,168 +4,33 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Engilab ETSEIB</title>
-
-    <!-- UPC stylesheets first -->
-    <link rel="stylesheet" type="text/css" href="https://www.upc.edu/++plone++production/++unique++2026-01-26T16:39:10.719273/default.css" data-bundle="production">
-    <link rel="stylesheet" type="text/css" href="https://www.upc.edu/++theme++homeupc/assets/css/homeupc-compiled.css?version=2020-02-13%2000%3A00%3A00.000003" data-bundle="homeupc">
-    <link rel="stylesheet" type="text/css" href="https://www.upc.edu/++theme++homeupc/assets/css/upc.css?version=2026-01-26%2011%3A00%3A00" data-bundle="upc-styles">
-
-    <!-- Your stylesheet LAST so it overrides UPC styles -->
     <link rel="stylesheet" href="style.css">
   </head>
   <body>
-
-    <h1 style="text-align: center; background-color: #003366; color: white; margin: 0; height: 80px; line-height: 80px;">
-      Engilab
-    </h1>
-
-    <div>
-      <img
-        src="https://media.istockphoto.com/id/1907248074/es/foto/impresora-3d-con-un-objeto-impreso-sobre-la-mesa.jpg?s=612x612&w=0&k=20&c=ZYnKnyR75XR_8EaZoeEAE-aytb91FcS14iZOJ8MyUtc="
-        alt="3D printer on a table"
-        style="width: 100%; height: 345px; object-fit: cover; display: block;">
+    <div id="tabs">
+    <ul>
+        <li><a href="#tabs-1">Tab 1</a>
+        </li>
+        <li><a href="#tabs-2">Tab 2</a>
+        </li>
+        <li><a href="#tabs-3">Tab 3</a>
+        </li>
+    </ul>
+    <div id="tabs-1">
+        Your content goes here for tab 1
+        <a href="#tabs-2">Tab 2</a>
+        <a href="#tabs-3">Tab 3</a>
     </div>
-
-    <!-- Open login modal button -->
-    <div style="text-align:center; margin-top: 24px;">
-      <button class="open-btn" onclick="openModal()">Login</button>
+    <div id="tabs-2">
+        Your content goes here for tab 2
+        <a href="#tabs-1">Tab 1</a>
+        <a href="#tabs-3">Tab 2</a>
     </div>
-
-    <!-- LOGIN MODAL -->
-    <div id="id01" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-
-      <span
-        onclick="closeModal()"
-        class="close"
-        title="Close Modal"
-        role="button"
-        tabindex="0"
-        onkeydown="if(event.key==='Enter'||event.key===' ')closeModal()"
-        aria-label="Close login modal">
-        &times;
-      </span>
-
-      <!--
-        SECURITY NOTES FOR BACKEND DEVELOPER:
-        1. This form must be served over HTTPS only.
-        2. Replace ACTION_URL with your real endpoint.
-        3. The server must:
-           - Generate a unique CSRF token per session and validate it on POST.
-           - Hash passwords with bcrypt (e.g. password_hash() in PHP).
-           - Never compare plaintext passwords.
-           - Implement rate limiting / account lockout on failed attempts.
-           - Set session cookies as HttpOnly, Secure, SameSite=Strict.
-           - If "remember me" is used, store a signed, random token in DB — never the password.
-      -->
-      <form
-        class="modal-content animate"
-        action="ACTION_URL"
-        method="POST"
-        id="loginForm"
-        onsubmit="return validateForm()">
-
-        <!-- CSRF Token: generate this server-side and inject it here -->
-        <!-- Example PHP: <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>"> -->
-        <input type="hidden" name="csrf_token" value="REPLACE_WITH_SERVER_GENERATED_TOKEN">
-
-        <div class="imgcontainer">
-          <!-- Generic user icon SVG — no broken image -->
-          <svg class="avatar" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" aria-hidden="true">
-            <circle cx="50" cy="50" r="50" fill="#003366"/>
-            <circle cx="50" cy="38" r="18" fill="#cce0ff"/>
-            <ellipse cx="50" cy="85" rx="28" ry="20" fill="#cce0ff"/>
-          </svg>
-          <h2 id="modal-title">Member Login</h2>
-        </div>
-
-        <div class="container">
-          <label for="uname"><b>Username</b></label>
-          <input
-            type="text"
-            id="uname"
-            placeholder="Enter Username"
-            name="uname"
-            autocomplete="username"
-            required
-            minlength="3"
-            maxlength="64"
-            pattern="[A-Za-z0-9_\-@\.]+"
-            title="Username may only contain letters, numbers, _, -, @, .">
-
-          <label for="psw"><b>Password</b></label>
-          <input
-            type="password"
-            id="psw"
-            placeholder="Enter Password"
-            name="psw"
-            autocomplete="current-password"
-            required
-            minlength="8"
-            maxlength="128">
-
-          <!-- Client-side feedback (server-side validation is also required!) -->
-          <div id="form-error" class="form-error" role="alert" aria-live="polite"></div>
-
-          <button type="submit">Login</button>
-
-          <label class="remember-label">
-            <input type="checkbox" name="remember"> Remember me
-            <span class="remember-hint">(stores a secure session token, not your password)</span>
-          </label>
-        </div>
-
-        <div class="container footer-container">
-          <button type="button" onclick="closeModal()" class="cancelbtn">Cancel</button>
-          <span class="psw">Forgot <a href="/reset-password">password?</a></span>
-        </div>
-
-      </form>
+    <div id="tabs-3">
+        Your content goes here for tab 3
+        <a href="#tabs-1">Tab 1</a>
+        <a href="#tabs-2">Tab 2</a>
     </div>
-
-    <script>
-      function openModal() {
-        var modal = document.getElementById('id01');
-        modal.style.display = 'block';
-        // Focus first input for accessibility
-        setTimeout(function() {
-          document.getElementById('uname').focus();
-        }, 100);
-      }
-
-      function closeModal() {
-        document.getElementById('id01').style.display = 'none';
-        document.getElementById('form-error').textContent = '';
-      }
-
-      // Close modal if user clicks outside the form box
-      window.addEventListener('click', function(e) {
-        var modal = document.getElementById('id01');
-        if (e.target === modal) closeModal();
-      });
-
-      // Close modal on Escape key
-      window.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') closeModal();
-      });
-
-      // Basic client-side validation (MUST also be validated server-side)
-      function validateForm() {
-        var uname = document.getElementById('uname').value.trim();
-        var psw   = document.getElementById('psw').value;
-        var errorEl = document.getElementById('form-error');
-        errorEl.textContent = '';
-
-        if (uname.length < 3) {
-          errorEl.textContent = 'Username must be at least 3 characters.';
-          return false;
-        }
-        if (psw.length < 8) {
-          errorEl.textContent = 'Password must be at least 8 characters.';
-          return false;
-        }
-        return true;
-      }
-    </script>
-
+</div>
   </body>
 </html>
