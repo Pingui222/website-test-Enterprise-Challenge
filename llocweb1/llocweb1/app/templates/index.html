@@ -1,0 +1,64 @@
+<html>
+  <head>
+    <meta charset="utf-8" >
+    <title>LLOC 1</title>
+    <!-- en local -->
+  
+
+   <script type = "text/javascript">
+    $(document).ready(function(){
+       document.getElementById('#demo').innerHTML = Date();
+     });
+    </script>
+    <style>
+      body{font: 14px sans-serif;}
+    </style>
+  </head>
+
+  <body>
+
+      <h1>Primer Lloc web</h1>
+      <p>Tarariii!!</p>
+      <div>
+ 	 <a href="/index" class="active">Home</a>
+   <a href="/sumavalors">Suma</a>
+   <a href="/load">Load</a>
+   <a href="/llistat">Mostra llista</a>
+      </div>	
+      <hr>
+      <p> L'acció d'aquest botó s'executa en el javascript del navegador. <br>
+        <button onclick="alert('Hello world!')">Clica'm!</button></p>
+      <hr>
+    <!--<form action="/action_page.php">-->
+    <p>Ejemple form 1</p>
+    <form action="/cotxe" method="post">
+        <select name="cars">
+          <option value="volvo">Volvo</option>
+          <option valua="batmovil">Batmovil</option>
+          <option value="saab">Saab</option>
+          <option value="fiat">Fiat</option>
+          <option value="audi">Audi</option>
+        </select>
+        <br><br>
+        <input type="submit">
+     </form>
+      <hr>
+
+    <p>Aquest formulari envia unes dades al servidor a la URL calcula i farà
+        uns càlculs amb una funció python. </p>
+    <form action="/calcula" method="post">
+        <!-- si es vol el resultat en una nova pestaña cal afegir taget="blank" després de method-->
+        Valor inicial: <input type="text" name="vini" value="0"><br>
+        <br>
+        Valor final  : <input type="text" name="vfin" value="15"><br>
+        <input type="submit" value="Enviar">
+    </form>
+      <hr>
+
+      <hr>
+      <p> Finalment es mostra la data i hora. Quan es crea el document a mostrar
+         s'executa la funció js.</p>
+      <!-- mostra la data -->
+      <p id="#demo"></p>
+  </body>
+</html>

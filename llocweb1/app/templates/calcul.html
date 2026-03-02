@@ -1,0 +1,24 @@
+<html>
+  <head>
+    <meta charset="utf-8" >
+    <title>{{ title }} - exemple</title>
+    <script>
+    function close_window() {
+        if (confirm("Close Window?")) {
+          close();
+        }
+    }
+    </script>
+    <style>
+      body{font: 14px sans-serif;}
+    </style>
+  </head>
+
+  <body>
+      <h1>Suma de valors entre {{ e1 }}..{{ e2 }} </h1>
+      <p> suma = {{ resultat }}</p>
+
+      <button onclick="javascript:history.go(-1)";>Go Back</button>
+
+  </body>
+  <!--    <a href="javascript:close_window();">close</a> -->
